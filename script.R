@@ -19,10 +19,34 @@ subsamp["RACE"][subsamp["RACE"] == 7] <- "Other race, nec	"
 subsamp["RACE"][subsamp["RACE"] == 8] <- "More than 2 races"
 subsamp["RACE"][subsamp["RACE"] == 9] <- "More than 2 races"
 
-subsamp["INCTOT"][subsamp["INCTOT"] == 0.1] <- 1
 
-y <- log(subsamp$INCTOT)
-ggplot( mapping = aes(x = subsamp$RACE, y=subsamp$INCTOT)) +
+
+subsamp = subsamp[subsamp$INCTOT >= 1, ]
+subsamp = subsamp[subsamp$INCTOT != 9999999, ]
+
+min(subsamp$INCTOT)
+
+
+ggplot( mapping = aes(x = subsamp$RACE, y =log(subsamp$INCTOT))) +
           geom_boxplot()
+
+######################################
+######################################
+
+subsamp["EDUC"][subsamp["EDUC"] == 00] <- "N/A or no schooling"
+subsamp["EDUC"][subsamp["EDUC"] == 01] <- "Nursery school to grade 4"
+subsamp["EDUC"][subsamp["EDUC"] == 02] <- "Grade 5, 6, 7, or 8"
+subsamp["EDUC"][subsamp["EDUC"] == 03] <- "Grade 9"
+subsamp["EDUC"][subsamp["EDUC"] == 04] <- "Grade 10"
+subsamp["EDUC"][subsamp["EDUC"] == 05] <- "Grade 11"
+subsamp["EDUC"][subsamp["EDUC"] == 06] <- "Grade 12"
+subsamp["EDUC"][subsamp["EDUC"] == 07] <- "1 year of college"
+subsamp["EDUC"][subsamp["EDUC"] == 08] <- "2 years of college"
+subsamp["EDUC"][subsamp["EDUC"] == 09] <- "3 years of college"
+subsamp["EDUC"][subsamp["EDUC"] == 10] <- "4 years of college"
+subsamp["EDUC"][subsamp["EDUC"] == 11] <- "5+ years of college"
+
+ggplot( mapping = aes(x = subsamp$EDUC, y =log(subsamp$INCTOT))) +
+  geom_boxplot()
 
         
