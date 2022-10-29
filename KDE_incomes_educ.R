@@ -5,6 +5,7 @@ data <- read.csv("usa_00006.csv")
 
 education <- data$EDUC
 income <- data$INCTOT
+race <- data$RACE
 
 data_income_educ <- data.frame(education, income)
 
@@ -102,6 +103,95 @@ ggplot(data=df, mappping=aes(x=income)) +
                                  "5+ years of college"),
                       values = c("red", "green", "blue", "yellow", "orange",
                                  "pink", "purple", "brown", "black", "magenta"))
+
+
+
+
+##################################################################3
+bw = 1600
+max= 100000
+education <- data$EDUC
+income <- data$INCTOT
+race <- data$RACE
+data_income_race <- data.frame(race, income)
+df <- data.frame()
+
+data_1 <- filter(data_income_race, race == "1")
+Y1 <- density(as.numeric(data_1$income), bw=bw,
+              n=10000, from=0, to=max)
+df1 <- data.frame(income = matrix(unlist(Y1[1])), density1 =  matrix(unlist(Y1[2])))
+df <- df1
+
+data_2 <- filter(data_income_race, race == "2")
+Y2 <- density(as.numeric(data_2$income), bw=bw,
+              n=10000, from=0, to=max)
+df2 <- data.frame(density2 =  matrix(unlist(Y2[2])))
+df <-cbind(df, df2)
+
+data_3 <- filter(data_income_race, race == "3")
+Y3 <- density(as.numeric(data_3$income), bw=bw,
+              n=10000, from=0, to=max)
+df3 <- data.frame(density3 =  matrix(unlist(Y3[2])))
+df <-cbind(df, df3)
+
+data_4 <- filter(data_income_race, race == "4")
+Y4 <- density(as.numeric(data_4$income), bw=bw,
+              n=10000, from=0, to=max)
+df4 <- data.frame(density4 =  matrix(unlist(Y4[2])))
+df <-cbind(df, df4)
+
+data_5 <- filter(data_income_race, race == "5")
+Y5 <- density(as.numeric(data_5$income), bw=bw,
+              n=10000, from=0, to=max)
+df5 <- data.frame(density5 =  matrix(unlist(Y5[2])))
+df <-cbind(df, df5)
+
+data_6 <- filter(data_income_race, race == "6")
+Y6 <- density(as.numeric(data_6$income), bw=bw,
+              n=10000, from=0, to=max)
+df6 <- data.frame(density6 =  matrix(unlist(Y6[2])))
+df <-cbind(df, df6)
+
+data_7 <- filter(data_income_race, race == "7")
+Y7 <- density(as.numeric(data_7$income), bw=bw,
+              n=10000, from=0, to=max)
+df7 <- data.frame(density7 =  matrix(unlist(Y7[2])))
+df <-cbind(df, df7)
+
+data_8 <- filter(data_income_race, race == "8")
+Y8 <- density(as.numeric(data_8$income), bw=bw,
+              n=10000, from=0, to=max)
+df8 <- data.frame(density8 =  matrix(unlist(Y8[2])))
+df <-cbind(df, df8)
+
+data_9 <- filter(data_income_race, race == "9")
+Y9 <- density(as.numeric(data_9$income), bw=bw,
+               n=10000, from=0, to=max)
+df9 <- data.frame(density9 =  matrix(unlist(Y9[2])))
+df <-cbind(df, df9)
+
+
+ggplot(data=df, mappping=aes(x=income)) +
+  geom_line(aes(x=income, y=density1, colour="White")) +
+  geom_line(aes(x=income, y=density2, colour="Black/African American")) +
+  geom_line(aes(x=income, y=density3, colour="American Indian or Alaska Native")) +
+  geom_line(aes(x=income, y=density4, colour="Chinese")) +
+  geom_line(aes(x=income, y=density5, colour= "Japanese")) +
+  geom_line(aes(x=income, y=density6, colour="Other Asian or Pacific Islander")) +
+  geom_line(aes(x=income, y=density7, colour="Other race, nec")) +
+  geom_line(aes(x=income, y=density8, colour="Two major races")) +
+  geom_line(aes(x=income, y=density9, colour="Three or more races")) +
+  scale_colour_manual("", 
+                      breaks = c("White",
+                                 "Black/African American",
+                                 "American Indian or Alaska Native", "Chinese",
+                                 "Japanese",
+                                 "Other Asian or Pacific Islander",
+                                 "Other race, nec",
+                                 "Two major races",
+                                 "Three or more races"),
+                      values = c("red", "green", "blue", "yellow", "orange",
+                                 "pink", "purple", "brown", "black"))
 
 
 

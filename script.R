@@ -80,6 +80,10 @@ ggplot( mapping = aes(x = subsamp$EDUC, y =log(subsamp$INCTOT)), cex.axis=0.2) +
 #income <- data$INCTOT
 
 #data_income_educ <- data.frame(education, income)
+
+#####################CECI NE MARCHE PAS
+##########################C DE LA MERDE
+###########################NE RUNNEZ PAS CA
 subsamp <- select(data, RACE, INCTOT, EDUC)
 subsamp = subsamp[subsamp$INCTOT >= 1, ]
 subsamp = subsamp[subsamp$INCTOT != 9999999, ]
