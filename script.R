@@ -86,18 +86,22 @@ subsamp = subsamp[subsamp$INCTOT != 9999999, ]
 
 
 labs <- c("Nursery school to grade 4", "Grade 5, 6, 7, or 8", "Grade 9", "Grade 10", "Grade 11", "Grade 12", "1 year of college", "2 years of college", "3 years of college", "4 years of college", "5+ years of college")
+values <- c("FF3333", "FF9933", "FFFF33", "99FF33", 
+           "33FF33", "33FFFF", "3333FF", "99004C", 
+           "336600", "CCE5FF")
 
-p <- ggplot()
 numy <- c(0,1,2,3,4,5,6,7,8,10,11)
+p <- ggplot()
 for (i in numy){
   print(i)
+  print(labs[i])
   new <- filter(subsamp, EDUC == i)
   Y <- density(as.numeric(new$INCTOT), bw=1000,n=10000, from=0, to=100000)
-  p <- p + geom_line(aes(x=matrix(unlist(Y[1])), y = log(matrix(unlist(Y[2]))), colour=labs[i]))
-  print(p)
+  p <- p  + geom_line(aes(x=matrix(unlist(Y[1])), y = log(matrix(unlist(Y[2]))), color=values[i]))
+  
 }
-
-p + scale_colour_manual("", 
+p
+p + scale_colour_manual( 
                       breaks = labs,
                       values = c("FF3333", "FF9933", "FFFF33", "99FF33", 
                                  "33FF33", "33FFFF", "3333FF", "99004C", 
@@ -105,7 +109,7 @@ p + scale_colour_manual("",
 
 p
 #ggplot() + 
-#  geom_line(aes(x=matrix(unlist(Y0[1])), y = log(matrix(unlist(Y0[2]))), colour="N/A or no schooling")) + 
+#geom_line(aes(x=matrix(unlist(Y0[1])), y = log(matrix(unlist(Y0[2]))), colour="N/A or no schooling")) + 
  # geom_line(aes(x=matrix(unlist(Y0[1])), y = log(matrix(unlist(Y1[2]))), colour="Nursery school to grade 4")) +
   #geom_line(aes(x=matrix(unlist(Y0[1])), y = log(matrix(unlist(Y2[2]))), colour="Grade 5, 6, 7, or 8")) +
   #scale_colour_manual("", 
