@@ -11,17 +11,19 @@ date: "2022-10-29"
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-## 
+## Introduction
 
-In this project, we will analyse data from the IPUMS USA database, which provides access to over sixty integrated, high-precision samples of the American population drawn from sixteen federal censuses.
+In this project, we will analyse data from the IPUMS USA database, which provides access to over sixty integrated, high-precision samples of the American population drawn from sixteen federal censuses (Source : <https://usa.ipums.org/usa-action/variables/group>)
 
 We wanted in particular to observe the effects of education and origin on the income in the American population. We were inspired by a study "The Employment of Low-Skilled Immigrant Men in the United States" (Brian Duncan Stephen J. Trejo, American Economic Review, May 2012) that claims that among people with the lowest education levels, immigrants exhibit substantially higher rates of employment than comparable natives.
 
-In this purpose, we selected a sample from year 2000. It consists of 2808457 observations together with the origin of the individuals (they are classified in 9 categories: white, black/African american, Chinese...), their income and their educational levels (12 categories from no schooling to 5 or plus years of college).
+In this purpose, we selected a sample from year 2000. It consists of 2808457 observations together with the origin of the individuals (they are classified in 9 categories: white, black/African american, Chinese...), their income and their educational levels (12 categories from *No Schooling* to *5+ years of college*).
+
+## Analysis
 
 To find relations between our different variables, we start to compare the income and the origin of the individuals. Let us start with a boxplot of the income for each of the origin to see how income is distributed. Here we plot the logarithm of the incomes : this prevents the outliers with higher income from hiding the variability among the lower levels of income, and allows for all the orders of magnitude of income to fit in the same plot.
 
-```{r boxplot race income, echo = FALSE}
+```{r boxplot race income, echo = FALSE, message=FALSE}
 library(ggplot2)
 library(tidyverse)
 library(dplyr)
@@ -51,11 +53,11 @@ ggplot( mapping = aes(x = Origin, y = Income)) +
 
 ```
 
-The diagram does not seem to show outstanding differences between the different origins. The highest income median is for the Japanese population (with an income around \$exp(10) \$= 22000 US-dollars). The three following highest median are for the Chinese, White and other Asians or Pacific Islanders. It can also be observed that the highest variance stands for the Chinese. Japanese and Chinese are also the populations with less outliers with a high income. The lowest incomes of the Japanese population are also way higher than those of the other categories.
+The diagram does not seem to show outstanding differences between the different origins. The highest income median is for the Japanese population (with an income around exp(10) = 22000 US-dollars). The three following highest median are for the Chinese, White and other Asians or Pacific Islanders. It can also be observed that the highest variance stands for the Chinese. Japanese and Chinese are also the populations with less outliers with a high income. The lowest incomes of the Japanese population are also way higher than those of the other categories.
 
 We now process to the same diagram with two boxplots showing the income for two categories of our observations : individuals that attempted school until the 12th grade and the ones that did at least one year of college.
 
-```{r boxplot education income,  echo = FALSE}
+```{r boxplot education income,  echo = FALSE,message=FALSE}
 
 subsamp <- select(data, RACE, INCTOT, EDUC)
 
@@ -85,17 +87,45 @@ subsamp <- select(data, RACE, INCTOT, EDUC)
 
 The second category, i.e. the workers that had a better level of education gets highest incomes overall. Variance and outliers seems to be similar. To have a more precise idea, we can do more boxplots with a broadest range of category to be more precise on the flow of income :
 
-```{r income vs origin boxplot, echo = FALSE}
+```{r income vs origin boxplot, echo = FALSE, message=FALSE}
+library(ggplot2)
+library(tidyverse)
+library(dplyr)
+
+
+
+subsamp["EDUC"][subsamp["EDUC"] == 00] <- "N/A or no schooling"
+subsamp["EDUC"][subsamp["EDUC"] == 01] <- "Nursery school to grade 4"
+subsamp["EDUC"][subsamp["EDUC"] == 02] <- "Grade 5, 6, 7, or 8"
+subsamp["EDUC"][subsamp["EDUC"] == 03] <- "Grade 9"
+subsamp["EDUC"][subsamp["EDUC"] == 04] <- "Grade 10"
+subsamp["EDUC"][subsamp["EDUC"] == 05] <- "Grade 11"
+subsamp["EDUC"][subsamp["EDUC"] == 06] <- "Grade 12"
+subsamp["EDUC"][subsamp["EDUC"] == 07] <- "1 year of college"
+subsamp["EDUC"][subsamp["EDUC"] == 08] <- "2 years of college"
+subsamp["EDUC"][subsamp["EDUC"] == 09] <- "3 years of college"
+subsamp["EDUC"][subsamp["EDUC"] == 10] <- "4 years of college"
+subsamp["EDUC"][subsamp["EDUC"] == 11] <- "5+ years of college"
+
+subsamp = subsamp[subsamp$INCTOT >= 1, ]
+subsamp = subsamp[subsamp$INCTOT != 9999999, ]
+
+
 subsamp$EDUC <- factor(subsamp$EDUC, levels=c("N/A or no schooling", "Nursery school to grade 4", "Grade 5, 6, 7, or 8","Grade 9","Grade 10","Grade 11","Grade 12","1 year of college", "2 years of college", "3 years of college", "4 years of college","5+ years of college"))
 ggplot( mapping = aes(x = subsamp$EDUC, y =log(subsamp$INCTOT)), cex.axis=0.2) +
   geom_boxplot() + labs(y= "log Income in dollars/year", x = "Education attainment")
+
+
+
+
+
 ```
 
 Here we can observe that the main gap occurs, as expected, after finishing high school. The income thenseems to steadily increase with each year after grade 12. On the other hand, the median income appears to decrease for people who started, but did not finish high school, compared with people who did not attend high school at all.
 
 To get a more holistic vision of our data, we produced a heatmap that links all the variables in one diagram.
 
-```{r presentation of the datas, echo = FALSE}
+```{r presentation of the datas, echo = FALSE, message=FALSE}
 library(heatmaply)
 library(ggplot2)
 library(tidyverse)
@@ -143,23 +173,20 @@ subsamp$EDUC <- factor(subsamp$EDUC, levels=c("N/A or no schooling",
 mat <- aggregate(x=as.numeric(subsamp$INCTOT),
                  by=list(subsamp$RACE,subsamp$EDUC),
                  FUN=mean)
-colnames(mat) <- c("race", "education", "avg_income")
-head(mat)
+colnames(mat) <- c("Origin", "Education", "Average_income")
 
-ggplot(mat, aes(x = race, y = education, fill = log(avg_income))) +
+
+ggplot(mat, aes(x = Origin, y = Education, fill = log(Average_income))) +
   theme(axis.text=element_text(size=5)) + geom_tile()
+x11(width = 20, height = 4)
 
-
-#str(mat)
-#mat <- as.matrix(mat)
-#p <- heatmaply(mat)
 ```
 
 We observe that the difference of income is more important between the rows than the columns. This is linked to the analysis we had with the boxplots. The incomes tends to depend more one the education levels than the origins.
 
 We will now perform Kernel Density Estimation for the income distribution, for each education level or origin, and will compare these plots. We use a Gaussian kernel.
 
-```{r KDE income education, echo = FALSE}
+```{r KDE income education, echo = FALSE, message=FALSE}
 education <- data$EDUC
 income <- data$INCTOT
 race <- data$RACE
@@ -268,7 +295,7 @@ Clearly the five first curves (representing the KDE of the incomes for individua
 
 Here is the diagram for the KDE of the density of the incomes with respect to the different origins.
 
-```{r KDE income race, echo = FALSE}
+```{r KDE income origin, echo = FALSE, message=FALSE}
 
 bw = 1600
 max= 100000
@@ -358,8 +385,8 @@ ggplot(data=df, mappping=aes(x=income)) + labs(y= "Density ", x = "Income") +
 
 Here the density estimations tend to be much more similar to each other. In fact there are again the curves standing for the Chinese, Japanese and other Asian or Pacific Islander that show a higher density for higher incomes. However, the difference is negligible compared with the variability observed among the education levels.
 
-**Conclusion**
+## **Conclusion**
 
-This is not enough to comment on the claim of the study we presented at the beginning. In fact, we should more concentrate on the rate of employment than the income to face the problematic the study had. We also could take a subset of data concerning the part of the population with less education (until grade 10th approximately, as we saw with KDE) and analyse this subsets with respect to the different origins. We also have to consider that we took a subset of the original data set concerning only the year 2000 which is also restrictive.
+This is not enough to comment on the claim of the study we presented at the beginning. In fact, we should more concentrate on the rate of employment than the income to face the problematic the study had. We also could take a subset of data concerning the part of the population with less education (until grade 10th approximately, as we saw with KDE) and analyse this subsets with respect to the different origins.
 
 Overall, we observed a clear effect of the education level on the income. On the other hand, the origin of the subject appeared to be almost irrelevant to explain the variability in income. To explain the remaining variability between the different origins, it would be interesting to observe how each origin category is distributed among the education levels.
