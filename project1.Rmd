@@ -1,0 +1,361 @@
+---
+title: "Project 1"
+subtitle: "Noam Ghenassia, Maïlis Fontani, Julia Morin"
+output:
+  html_document: default
+  pdf_document: default
+date: "2022-10-29"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## 
+
+In this project, we will analyse data from a study called "The Employment of Low-Skilled Immigrant Men in the United States". The study aims to show how the employment rates of foreign-born and US-born men vary with education. The study claims that among those with the lowest education levels, immigrants exhibit substantially higher rates of employment than comparable natives. For this project we took a restrained data set, we will concentrate on the year 2016 and will see if the original study's claim can be confirmed.
+
+*Julia: In this project, we will analyse data from the IPUMS USA database, which provides access to over sixty integrated, high-precision samples of the American population drawn from sixteen federal censuses.*
+
+*We wanted in particular to observe the effects of education and origin on the income in the American population. We were inspired by a study "The Employment of Low-Skilled Immigrant Men in the United States" (Brian Duncan Stephen J. Trejo, American Economic Review, May 2012) that* *claims that among people with the lowest education levels, immigrants exhibit substantially higher rates of employment than comparable natives*.
+
+In this purpose, we selected a sample from year 2000. It consists of 2808457 observations together with the origin of the individuals (they are classified in 9 categories: white, black/African american, Chinese...), their income and their educational levels (12 categories from no schooling to 5 or plus years of college).
+
+To find relations between our different variables, we start to compare the income and the origin of the individuals. Let us start with a boxplot of the income for each of the origin to see how income is distributed. We took the logarithm of the incomes to **be able to fit the datas in the diagram**.
+
+```{r boxplot race income, echo = FALSE}
+library(ggplot2)
+library(tidyverse)
+library(dplyr)
+
+data <- read.csv("usa_00006.csv")
+
+subsamp <- select(data, RACE, INCTOT, EDUC)
+
+subsamp["RACE"][subsamp["RACE"] == 1] <- "White"
+subsamp["RACE"][subsamp["RACE"] == 2] <- "Black/African American"
+subsamp["RACE"][subsamp["RACE"] == 3] <- "American Indian/Alaska Native"
+subsamp["RACE"][subsamp["RACE"] == 4] <- "Chinese"
+subsamp["RACE"][subsamp["RACE"] == 5] <- "Japanese"
+subsamp["RACE"][subsamp["RACE"] == 6] <- "Other Asian/Pacific Islander"
+subsamp["RACE"][subsamp["RACE"] == 7] <- "Other race, nec	"
+subsamp["RACE"][subsamp["RACE"] == 8] <- "More than 2 races"
+subsamp["RACE"][subsamp["RACE"] == 9] <- "More than 2 races"
+
+subsamp = subsamp[subsamp$INCTOT >= 1, ]
+subsamp = subsamp[subsamp$INCTOT != 9999999, ]
+
+Origin <- subsamp$RACE
+Income <- log(subsamp$INCTOT)
+
+ggplot( mapping = aes(x = Origin, y = Income)) +
+  geom_boxplot() + theme(axis.text=element_text(size=5)) + labs(y= "log Income in dollars/year ", x = "Origin")
+
+```
+
+The diagram does not seem to show outstanding differences between the different origins. The highest income median is for the Japanese population (with an income around \$exp(10) \$= 22000 US-dollars). The three following highest median are for the Chinese, White and other Asians or Pacific Islanders. It can also be observed that the highest variance stands for the Chinese. Japanese and Chinese are also the populations with less outliers with a high income. The lowest incomes of the Japanese population are also way higher than those of the other categories.
+
+We now process to the same diagram with two boxplots showing the income for two categories of our observations : individuals that attempted school until the 12th grade and the ones that did at least one year of college.
+
+```{r boxplot education income,  echo = FALSE}
+
+subsamp <- select(data, RACE, INCTOT, EDUC)
+
+  subsamp["EDUC"][subsamp["EDUC"] == 00] <- "Grade 12 or less"
+  subsamp["EDUC"][subsamp["EDUC"] == 01] <- "Grade 12 or less"
+  subsamp["EDUC"][subsamp["EDUC"] == 02] <- "Grade 12 or less"
+  subsamp["EDUC"][subsamp["EDUC"] == 03] <- "Grade 12 or less"
+  subsamp["EDUC"][subsamp["EDUC"] == 04] <- "Grade 12 or less"
+  subsamp["EDUC"][subsamp["EDUC"] == 05] <- "Grade 12 or less"
+  subsamp["EDUC"][subsamp["EDUC"] == 06] <- "Grade 12 or less"
+  subsamp["EDUC"][subsamp["EDUC"] == 07] <- "1+ year of college"
+  subsamp["EDUC"][subsamp["EDUC"] == 08] <- "1+ year of college"
+  subsamp["EDUC"][subsamp["EDUC"] == 09] <- "1+ year of college"
+  subsamp["EDUC"][subsamp["EDUC"] == 10] <- "1+ year of college"
+  subsamp["EDUC"][subsamp["EDUC"] == 11] <- "1+ year of college"
+  
+  
+  subsamp = subsamp[subsamp$INCTOT >= 1, ]
+  subsamp = subsamp[subsamp$INCTOT != 9999999, ]
+  
+  Income <- log(subsamp$INCTOT)
+  
+  subsamp$EDUC <- factor(subsamp$EDUC, levels=c("Grade 12 or less","1+ year of college"))
+  ggplot( mapping = aes(x = subsamp$EDUC, y = Income), cex.axis=0.2) +
+    geom_boxplot() + labs(y= "log Income in dollars/year ", x = "Education attainment")
+```
+
+The second category, i.e. the workers that had a better level of education gets highest incomes overall. Variance and outliers seems to be similar. To have a more precise idea, we could have done more boxplots with a broadest range of category to be more precise on the flow of income.
+
+To get a more holistic vision of our data, we do a heatmap that links all the variables in one diagram.
+
+```{r presentation of the datas, echo = FALSE}
+library(heatmaply)
+library(ggplot2)
+library(tidyverse)
+library(dplyr)
+
+subsamp <- select(data, RACE, INCTOT, EDUC)
+
+subsamp["RACE"][subsamp["RACE"] == 1] <- "White"
+subsamp["RACE"][subsamp["RACE"] == 2] <- "Black/African American"
+subsamp["RACE"][subsamp["RACE"] == 3] <- "American Indian/ Alaska Native"
+subsamp["RACE"][subsamp["RACE"] == 4] <- "Chinese"
+subsamp["RACE"][subsamp["RACE"] == 5] <- "Japanese"
+subsamp["RACE"][subsamp["RACE"] == 6] <- "Other Asian/Pacific Islander"
+subsamp["RACE"][subsamp["RACE"] == 7] <- "Other race, nec	"
+subsamp["RACE"][subsamp["RACE"] == 8] <- "More than 2 races"
+subsamp["RACE"][subsamp["RACE"] == 9] <- "More than 2 races"
+
+subsamp["EDUC"][subsamp["EDUC"] == 00] <- "N/A or no schooling"
+subsamp["EDUC"][subsamp["EDUC"] == 01] <- "Nursery school to grade 4"
+subsamp["EDUC"][subsamp["EDUC"] == 02] <- "Grade 5, 6, 7, or 8"
+subsamp["EDUC"][subsamp["EDUC"] == 03] <- "Grade 9"
+subsamp["EDUC"][subsamp["EDUC"] == 04] <- "Grade 10"
+subsamp["EDUC"][subsamp["EDUC"] == 05] <- "Grade 11"
+subsamp["EDUC"][subsamp["EDUC"] == 06] <- "Grade 12"
+subsamp["EDUC"][subsamp["EDUC"] == 07] <- "1 year of college"
+subsamp["EDUC"][subsamp["EDUC"] == 08] <- "2 years of college"
+subsamp["EDUC"][subsamp["EDUC"] == 09] <- "3 years of college"
+subsamp["EDUC"][subsamp["EDUC"] == 10] <- "4 years of college"
+subsamp["EDUC"][subsamp["EDUC"] == 11] <- "5+ years of college"
+
+subsamp = subsamp[subsamp$INCTOT >= 1, ]
+subsamp = subsamp[subsamp$INCTOT != 9999999, ]
+subsamp$EDUC <- factor(subsamp$EDUC, levels=c("N/A or no schooling",
+                                              "Nursery school to grade 4",
+                                              "Grade 5, 6, 7, or 8",
+                                              "Grade 9","Grade 10",
+                                              "Grade 11",
+                                              "Grade 12",
+                                              "1 year of college",
+                                              "2 years of college",
+                                              "3 years of college",
+                                              "4 years of college",
+                                              "5+ years of college"))
+
+mat <- aggregate(x=as.numeric(subsamp$INCTOT),
+                 by=list(subsamp$RACE,subsamp$EDUC),
+                 FUN=mean)
+colnames(mat) <- c("race", "education", "avg_income")
+head(mat)
+
+ggplot(mat, aes(x = race, y = education, fill = log(avg_income))) +
+  theme(axis.text=element_text(size=5)) + geom_tile()
+
+
+#str(mat)
+#mat <- as.matrix(mat)
+#p <- heatmaply(mat)
+```
+
+We observe that the difference of income is more important between the rows than the columns. This is linked to the analysis we had with the boxplots. The incomes tends to depend more one the education levels than the origins.
+
+We will now perform Kernel Density Estimation for the income distribution, for each education level or origin, and will compare these plots. We use a Gaussian kernel.
+
+```{r KDE income education, echo = FALSE}
+education <- data$EDUC
+income <- data$INCTOT
+race <- data$RACE
+
+data_income_educ <- data.frame(education, income)
+
+data_income_educ <- data_income_educ[data_income_educ$income != 9999999, ] 
+data_income_educ <- data_income_educ[data_income_educ$income != 0, ]
+
+bw = 1600
+max= 100000
+
+df <- data.frame()
+
+data_1 <- filter(data_income_educ, education == "1")
+Y1 <- density(as.numeric(data_1$income), bw=bw,
+              n=10000, from=0, to=max)
+df1 <- data.frame(income = matrix(unlist(Y1[1])), density1 =  matrix(unlist(Y1[2])))
+df <- df1
+
+data_2 <- filter(data_income_educ, education == "2")
+Y2 <- density(as.numeric(data_2$income), bw=bw,
+              n=10000, from=0, to=max)
+df2 <- data.frame(density2 =  matrix(unlist(Y2[2])))
+df <-cbind(df, df2)
+
+data_3 <- filter(data_income_educ, education == "3")
+Y3 <- density(as.numeric(data_3$income), bw=bw,
+              n=10000, from=0, to=max)
+df3 <- data.frame(density3 =  matrix(unlist(Y3[2])))
+df <-cbind(df, df3)
+
+data_4 <- filter(data_income_educ, education == "4")
+Y4 <- density(as.numeric(data_4$income), bw=bw,
+              n=10000, from=0, to=max)
+df4 <- data.frame(density4 =  matrix(unlist(Y4[2])))
+df <-cbind(df, df4)
+
+data_5 <- filter(data_income_educ, education == "5")
+Y5 <- density(as.numeric(data_5$income), bw=bw,
+              n=10000, from=0, to=max)
+df5 <- data.frame(density5 =  matrix(unlist(Y5[2])))
+df <-cbind(df, df5)
+
+data_6 <- filter(data_income_educ, education == "6")
+Y6 <- density(as.numeric(data_6$income), bw=bw,
+              n=10000, from=0, to=max)
+df6 <- data.frame(density6 =  matrix(unlist(Y6[2])))
+df <-cbind(df, df6)
+
+data_7 <- filter(data_income_educ, education == "7")
+Y7 <- density(as.numeric(data_7$income), bw=bw,
+              n=10000, from=0, to=max)
+df7 <- data.frame(density7 =  matrix(unlist(Y7[2])))
+df <-cbind(df, df7)
+
+data_8 <- filter(data_income_educ, education == "8")
+Y8 <- density(as.numeric(data_8$income), bw=bw,
+              n=10000, from=0, to=max)
+df8 <- data.frame(density8 =  matrix(unlist(Y8[2])))
+df <-cbind(df, df8)
+
+data_10 <- filter(data_income_educ, education == "10")
+Y10 <- density(as.numeric(data_10$income), bw=bw,
+              n=10000, from=0, to=max)
+df10 <- data.frame(density10 =  matrix(unlist(Y10[2])))
+df <-cbind(df, df10)
+
+data_11 <- filter(data_income_educ, education == "11")
+Y11 <- density(as.numeric(data_11$income), bw=bw,
+              n=10000, from=0, to=max)
+df11 <- data.frame(density11 =  matrix(unlist(Y11[2])))
+df <-cbind(df, df11)
+
+
+
+ggplot(data=df, mappping=aes(x=income)) + labs(y= "Density ", x = "Income") +
+  geom_line(aes(x=income, y=density1, colour="Nursery school to grade 4")) +
+  geom_line(aes(x=income, y=density2, colour="Grade 5, 6, 7, or 8")) +
+  geom_line(aes(x=income, y=density3, colour="Grade 9")) +
+  geom_line(aes(x=income, y=density4, colour="Grade 10")) +
+  geom_line(aes(x=income, y=density5, colour="Grade 11")) +
+  geom_line(aes(x=income, y=density6, colour="Grade 12")) +
+  geom_line(aes(x=income, y=density7, colour="1 year of college")) +
+  geom_line(aes(x=income, y=density8, colour="2 years of college")) +
+  geom_line(aes(x=income, y=density10, colour="4 years of college")) +
+  geom_line(aes(x=income, y=density11, colour="5+ years of college")) +
+  scale_colour_manual("", 
+                      breaks = c("Nursery school to grade 4",
+                                 "Grade 5, 6, 7, or 8",
+                                 "Grade 9", "Grade 10",
+                                 "Grade 11",
+                                 "Grade 12",
+                                 "1 year of college",
+                                 "2 years of college",
+                                 "3 years of college",
+                                 "4 years of college",
+                                 "5+ years of college"),
+                      values = c("red", "green", "blue", "yellow", "orange",
+                                 "pink", "purple", "brown", "black", "magenta")) 
+```
+
+Clearly the five first curves (representing the KDE of the incomes for individuals that stopped school after the 10th grade) are high for low income and decrease very quickly.
+
+There is a peak of income around 1000 US- dollars which can be explained by the fact that it can be common to earn multiples of 1000 US-dollars, or that the individuals approximated their income when they have been asked. Manually we tried to use different bandwidth and the peak at the 1000 US dollars income always appeared. Also, trying to minimize curves oscillations on one hand and the bias on the other hand, we finally chose to take a bandwidth of 1600.
+
+Concerning the other curves, we see that the income density is better balanced on the income axis. In fact there are more individuals with a high income among those who attempted school after the 11th grade.
+
+Here is the diagram for the KDE of the density of the incomes with respect to the different origins.
+
+```{r KDE income race, echo = FALSE}
+
+bw = 1600
+max= 100000
+education <- data$EDUC
+income <- data$INCTOT
+race <- data$RACE
+data_income_race <- data.frame(race, income)
+df <- data.frame()
+
+data_1 <- filter(data_income_race, race == "1")
+Y1 <- density(as.numeric(data_1$income), bw=bw,
+              n=10000, from=0, to=max)
+df1 <- data.frame(income = matrix(unlist(Y1[1])), density1 =  matrix(unlist(Y1[2])))
+df <- df1
+
+data_2 <- filter(data_income_race, race == "2")
+Y2 <- density(as.numeric(data_2$income), bw=bw,
+              n=10000, from=0, to=max)
+df2 <- data.frame(density2 =  matrix(unlist(Y2[2])))
+df <-cbind(df, df2)
+
+data_3 <- filter(data_income_race, race == "3")
+Y3 <- density(as.numeric(data_3$income), bw=bw,
+              n=10000, from=0, to=max)
+df3 <- data.frame(density3 =  matrix(unlist(Y3[2])))
+df <-cbind(df, df3)
+
+data_4 <- filter(data_income_race, race == "4")
+Y4 <- density(as.numeric(data_4$income), bw=bw,
+              n=10000, from=0, to=max)
+df4 <- data.frame(density4 =  matrix(unlist(Y4[2])))
+df <-cbind(df, df4)
+
+data_5 <- filter(data_income_race, race == "5")
+Y5 <- density(as.numeric(data_5$income), bw=bw,
+              n=10000, from=0, to=max)
+df5 <- data.frame(density5 =  matrix(unlist(Y5[2])))
+df <-cbind(df, df5)
+
+data_6 <- filter(data_income_race, race == "6")
+Y6 <- density(as.numeric(data_6$income), bw=bw,
+              n=10000, from=0, to=max)
+df6 <- data.frame(density6 =  matrix(unlist(Y6[2])))
+df <-cbind(df, df6)
+
+data_7 <- filter(data_income_race, race == "7")
+Y7 <- density(as.numeric(data_7$income), bw=bw,
+              n=10000, from=0, to=max)
+df7 <- data.frame(density7 =  matrix(unlist(Y7[2])))
+df <-cbind(df, df7)
+
+data_8 <- filter(data_income_race, race == "8")
+Y8 <- density(as.numeric(data_8$income), bw=bw,
+              n=10000, from=0, to=max)
+df8 <- data.frame(density8 =  matrix(unlist(Y8[2])))
+df <-cbind(df, df8)
+
+data_9 <- filter(data_income_race, race == "9")
+Y9 <- density(as.numeric(data_9$income), bw=bw,
+              n=10000, from=0, to=max)
+df9 <- data.frame(density9 =  matrix(unlist(Y9[2])))
+df <-cbind(df, df9)
+
+
+ggplot(data=df, mappping=aes(x=income)) + labs(y= "Density ", x = "Income") +
+  geom_line(aes(x=income, y=density1, colour="White")) +
+  geom_line(aes(x=income, y=density2, colour="Black/African American")) +
+  geom_line(aes(x=income, y=density3, colour="American Indian or Alaska Native")) +
+  geom_line(aes(x=income, y=density4, colour="Chinese")) +
+  geom_line(aes(x=income, y=density5, colour= "Japanese")) +
+  geom_line(aes(x=income, y=density6, colour="Other Asian or Pacific Islander")) +
+  geom_line(aes(x=income, y=density7, colour="Other race, nec")) +
+  geom_line(aes(x=income, y=density8, colour="Two major races")) +
+  geom_line(aes(x=income, y=density9, colour="Three or more races")) +
+  scale_colour_manual("", 
+                      breaks = c("White",
+                                 "Black/African American",
+                                 "American Indian or Alaska Native", "Chinese",
+                                 "Japanese",
+                                 "Other Asian or Pacific Islander",
+                                 "Other race, nec",
+                                 "Two major races",
+                                 "Three or more races"),
+                      values = c("red", "green", "blue", "yellow", "orange",
+                                 "pink", "purple", "brown", "black")) 
+```
+
+Here the density estimations tend to be much more similar to each other. In fact there are again the curves standing for the Chinese, Japanese and other Asian or Pacific Islander that show a higher density for higher incomes. We can however not conclude anything on the link between the income and the origin of the workers.
+
+**Conclusion**
+
+Incomes seems to depend more on the educational level than the origin of the employees. However we should do more analysis to precise our study. A good idea would be to do a cross validation for the bandwiths of the Kernel density estimation. This could be done with a ten fold cross-validation, doing a KDE on 90% of our data and testing the obtained distribution with the remaining 10%. We should then vary the chosen 90% subset of our data set, this would give 10 different KDE with different testing results and for each of them we would try with different bandwidths. The cross-validation process chooses the subset with the bandwidth that gave the best testing results.
+
+This is not enough to comment on the claim of the study we presented at the beginning. In fact, we should more concentrate on the rate of employment than the income to face the problematic the study had. We also could take a subset of data concerning the part of the population with less education (until grade 10th approximately, as we saw with KDE) and analyse this subsets with respect to the different origins. We also have to consider that we took a subset of the original data set concerning only the year 2000 which is also restrictive.
