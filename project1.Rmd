@@ -121,7 +121,7 @@ ggplot( mapping = aes(x = subsamp$EDUC, y =log(subsamp$INCTOT)), cex.axis=0.2) +
 
 ```
 
-Here we can observe that the main gap occurs, as expected, after finishing high school. The income thenseems to steadily increase with each year after grade 12. On the other hand, the median income appears to decrease for people who started, but did not finish high school, compared with people who did not attend high school at all.
+Here we can observe that the main gap occurs, as expected, after finishing high school. The income then seems to steadily increase with each year after grade 12. On the other hand, the median income appears to decrease for people who started, but did not finish high school, compared with people who did not attend high school at all.
 
 To get a more holistic vision of our data, we produced a heatmap that links all the variables in one diagram.
 
