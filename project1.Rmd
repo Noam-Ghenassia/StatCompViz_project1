@@ -92,8 +92,7 @@ library(ggplot2)
 library(tidyverse)
 library(dplyr)
 
-
-
+subsamp <- select(data, RACE, INCTOT, EDUC)
 subsamp["EDUC"][subsamp["EDUC"] == 00] <- "N/A or no schooling"
 subsamp["EDUC"][subsamp["EDUC"] == 01] <- "Nursery school to grade 4"
 subsamp["EDUC"][subsamp["EDUC"] == 02] <- "Grade 5, 6, 7, or 8"
